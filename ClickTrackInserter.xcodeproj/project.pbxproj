@@ -19,6 +19,7 @@
 		0E164D9E2FECE65800937F2C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E164D862FECE65800937F2C /* AppDelegate.swift */; };
 		0E164D9F2FECE65800937F2C /* LogicProController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E164D8F2FECE65800937F2C /* LogicProController.swift */; };
 		0E7187232FED3F2600633CBF /* HotkeyConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7187222FED3F2600633CBF /* HotkeyConfig.swift */; };
+		AA000001000000000000001A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001B /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		0E164D902FECE65800937F2C /* MappingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappingStore.swift; sourceTree = "<group>"; };
 		0E164D912FECE65800937F2C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0E7187222FED3F2600633CBF /* HotkeyConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyConfig.swift; sourceTree = "<group>"; };
+		AA000001000000000000001B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		F81654872FEC498800D9D585 /* Directioner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Directioner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F84E38062FEC4C5500801ECB /* ClickTrackInserter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ClickTrackInserter.xcodeproj; sourceTree = "<group>"; };
 		F84E38292FEC4DC400801ECB /* ClickTrackInserter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ClickTrackInserter.xcodeproj; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				0E7187222FED3F2600633CBF /* HotkeyConfig.swift */,
+				AA000001000000000000001B /* OnboardingView.swift */,
 				0E164D862FECE65800937F2C /* AppDelegate.swift */,
 				0E164D872FECE65800937F2C /* Assets.xcassets */,
 				0E164D882FECE65800937F2C /* ClickTrackInserter.xcodeproj */,
@@ -211,6 +214,7 @@
 				0E164D982FECE65800937F2C /* InputPopupController.swift in Sources */,
 				0E164D992FECE65800937F2C /* ContentView.swift in Sources */,
 				0E7187232FED3F2600633CBF /* HotkeyConfig.swift in Sources */,
+				AA000001000000000000001A /* OnboardingView.swift in Sources */,
 				0E164D9A2FECE65800937F2C /* DragSourceWindow.swift in Sources */,
 				0E164D9B2FECE65800937F2C /* ClickTrackInserterApp.swift in Sources */,
 				0E164D9C2FECE65800937F2C /* MappingStore.swift in Sources */,

@@ -18,6 +18,8 @@
 		AA100009000000000000AA09 /* MappingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200009000000000000AA09 /* MappingStore.swift */; };
 		AA10000A000000000000AA0A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA20000A000000000000AA0A /* SettingsView.swift */; };
 		AA10000B000000000000AA0B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA20000B000000000000AA0B /* Assets.xcassets */; };
+		AA10000C000000000000AA0C /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA20000C000000000000AA0C /* OnboardingView.swift */; };
+		AA10000D000000000000AA0D /* HotkeyConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA20000D000000000000AA0D /* HotkeyConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +35,8 @@
 		AA200009000000000000AA09 /* MappingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappingStore.swift; sourceTree = "<group>"; };
 		AA20000A000000000000AA0A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA20000B000000000000AA0B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA20000C000000000000AA0C /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		AA20000D000000000000AA0D /* HotkeyConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +72,8 @@
 				AA200008000000000000AA08 /* LogicProController.swift */,
 				AA200009000000000000AA09 /* MappingStore.swift */,
 				AA20000A000000000000AA0A /* SettingsView.swift */,
+				AA20000C000000000000AA0C /* OnboardingView.swift */,
+				AA20000D000000000000AA0D /* HotkeyConfig.swift */,
 			);
 			name = ClickTrackInserter;
 			sourceTree = "<group>";
@@ -182,6 +188,8 @@
 				AA100008000000000000AA08 /* LogicProController.swift in Sources */,
 				AA100009000000000000AA09 /* MappingStore.swift in Sources */,
 				AA10000A000000000000AA0A /* SettingsView.swift in Sources */,
+				AA10000C000000000000AA0C /* OnboardingView.swift in Sources */,
+				AA10000D000000000000AA0D /* HotkeyConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

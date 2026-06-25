@@ -19,11 +19,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let logicPro = LogicProController()
     private let dropIndicator = DropIndicator()
 
+    private var onboardingWindow: NSWindow?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
         NSApp.setActivationPolicy(.accessory)
         setupMenuBarItem()
         setupHotkey()
+
+        if !UserDefaults.standard.bool(forKey: "onboardingDone") {
+            showOnboarding()
+        }
+    }
+
+    private func showOnboarding() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 420),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Directioner 시작하기"
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: OnboardingView {
+            UserDefaults.standard.set(true, forKey: "onboardingDone")
+            window.orderOut(nil)
+        })
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        onboardingWindow = window
     }
 
     private func setupHotkey() {
@@ -73,7 +98,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem?.menu = menu
     }
 
-    @objc private func openSettings() {
+    @objc func openSettings() {
         if settingsWindow == nil {
             let window = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 480, height: 320),
