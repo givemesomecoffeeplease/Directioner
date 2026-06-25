@@ -65,3 +65,75 @@ class MappingStore: ObservableObject {
         mappings = decoded
     }
 }
+
+// MARK: - 단축키 설정
+
+enum ModifierKey: String, Codable, CaseIterable, Identifiable {
+    case shift, option, command, control
+
+    var id: String { rawValue }
+
+    var symbol: String {
+        switch self {
+        case .shift:   return "⇧"
+        case .option:  return "⌥"
+        case .command: return "⌘"
+        case .control: return "⌃"
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .shift:   return "Shift"
+        case .option:  return "Option"
+        case .command: return "Command"
+        case .control: return "Control"
+        }
+    }
+}
+
+struct HotkeyConfig: Codable, Equatable {
+
+    enum Kind: Codable, Equatable {
+        case doubleTap(ModifierKey)
+        case combo(modifiers: [ModifierKey], keyCode: UInt16, keyLabel: String)
+    }
+
+    var kind: Kind
+
+    var displayString: String {
+        switch kind {
+        case .doubleTap(let mod):
+            return "\(mod.symbol)\(mod.symbol)  \(mod.displayName) 두 번"
+        case .combo(let mods, _, let label):
+            return mods.map { $0.symbol }.joined() + label
+        }
+    }
+
+    static let `default` = HotkeyConfig(kind: .doubleTap(.shift))
+}
+
+class HotkeyStore: ObservableObject {
+    static let shared = HotkeyStore()
+
+    private let udKey = "hotkeyConfig_v1"
+
+    @Published var config: HotkeyConfig {
+        didSet { save() }
+    }
+
+    private init() {
+        if let data = UserDefaults.standard.data(forKey: udKey),
+           let decoded = try? JSONDecoder().decode(HotkeyConfig.self, from: data) {
+            config = decoded
+        } else {
+            config = .default
+        }
+    }
+
+    private func save() {
+        if let data = try? JSONEncoder().encode(config) {
+            UserDefaults.standard.set(data, forKey: udKey)
+        }
+    }
+}

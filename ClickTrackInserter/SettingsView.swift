@@ -14,6 +14,8 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            HotkeySettingsRow()
+            Divider()
             // 기존 매핑 목록
             if store.mappings.isEmpty && !showingPending {
                 Spacer()
@@ -212,6 +214,139 @@ struct MappingEditView: View {
 }
 
 enum MappingEditMode { case edit(Mapping) }
+
+// MARK: - 단축키 설정 행
+
+struct HotkeySettingsRow: View {
+    @ObservedObject private var hotkeyStore = HotkeyStore.shared
+    @State private var isRecording = false
+    @State private var recordingTap: CFMachPort? = nil
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text("단축키")
+                .frame(width: 50, alignment: .trailing)
+                .foregroundColor(.secondary)
+                .font(.callout)
+
+            Text(isRecording ? "⌨ 키를 누르세요 (ESC 취소)" : hotkeyStore.config.displayString)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .frame(minWidth: 180, alignment: .leading)
+                .background(Color(isRecording ? .systemYellow : .controlBackgroundColor).opacity(isRecording ? 0.3 : 1))
+                .cornerRadius(6)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(isRecording ? .systemOrange : .separatorColor), lineWidth: 1))
+                .animation(.easeInOut(duration: 0.15), value: isRecording)
+
+            Button(isRecording ? "취소" : "변경") {
+                if isRecording { stopRecording() } else { startRecording() }
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private func startRecording() {
+        isRecording = true
+        let mask: CGEventMask = (1 << CGEventType.flagsChanged.rawValue)
+                              | (1 << CGEventType.keyDown.rawValue)
+
+        final class Box { var tap: CFMachPort?; var row: HotkeySettingsRow? }
+        let box = Box(); box.row = self
+
+        let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: mask,
+            callback: { _, type, event, refcon in
+                let b = Unmanaged<Box>.fromOpaque(refcon!).takeUnretainedValue()
+                DispatchQueue.main.async { b.row?.handleRecordedEvent(type: type, event: event) }
+                return nil // 모든 키 소비 (recording 중 오작동 방지)
+            },
+            userInfo: Unmanaged.passRetained(box).toOpaque()
+        )
+        guard let tap else { isRecording = false; return }
+        recordingTap = tap
+        box.tap = tap
+        let src = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        CFRunLoopAddSource(CFRunLoopGetMain(), src, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+    }
+
+    private func stopRecording() {
+        if let tap = recordingTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+            recordingTap = nil
+        }
+        isRecording = false
+    }
+
+    private func handleRecordedEvent(type: CGEventType, event: CGEvent) {
+        let flags = event.flags
+
+        if type == .keyDown {
+            let keyCode = UInt16(event.getIntegerValueField(.keyboardEventKeycode))
+
+            // ESC → 취소
+            if keyCode == 53 { stopRecording(); return }
+
+            // 모디파이어 조합 수집
+            var mods: [ModifierKey] = []
+            if flags.contains(.maskCommand) { mods.append(.command) }
+            if flags.contains(.maskControl) { mods.append(.control) }
+            if flags.contains(.maskAlternate) { mods.append(.option) }
+            if flags.contains(.maskShift) { mods.append(.shift) }
+
+            // 키 레이블
+            let label = keyLabel(for: keyCode)
+            let config = HotkeyConfig(kind: .combo(modifiers: mods, keyCode: keyCode, keyLabel: label))
+            hotkeyStore.config = config
+            stopRecording()
+            AppDelegate.shared?.hotkeyMonitor.restart()
+            return
+        }
+
+        if type == .flagsChanged {
+            // 모디파이어만 단독으로 눌린 경우 → doubleTap 설정
+            let onlyShift   = flags.contains(.maskShift) && !flags.contains(.maskAlternate) && !flags.contains(.maskCommand) && !flags.contains(.maskControl)
+            let onlyOption  = flags.contains(.maskAlternate) && !flags.contains(.maskShift) && !flags.contains(.maskCommand) && !flags.contains(.maskControl)
+            let onlyCommand = flags.contains(.maskCommand) && !flags.contains(.maskShift) && !flags.contains(.maskAlternate) && !flags.contains(.maskControl)
+            let onlyControl = flags.contains(.maskControl) && !flags.contains(.maskShift) && !flags.contains(.maskAlternate) && !flags.contains(.maskCommand)
+
+            let mod: ModifierKey?
+            if onlyShift { mod = .shift }
+            else if onlyOption { mod = .option }
+            else if onlyCommand { mod = .command }
+            else if onlyControl { mod = .control }
+            else { mod = nil }
+
+            if let mod {
+                let config = HotkeyConfig(kind: .doubleTap(mod))
+                hotkeyStore.config = config
+                stopRecording()
+                AppDelegate.shared?.hotkeyMonitor.restart()
+            }
+        }
+    }
+
+    private func keyLabel(for keyCode: UInt16) -> String {
+        let map: [UInt16: String] = [
+            49: "Space", 36: "Return", 48: "Tab", 51: "⌫",
+            123: "←", 124: "→", 125: "↓", 126: "↑",
+            53: "ESC", 116: "PgUp", 121: "PgDn", 115: "Home", 119: "End",
+        ]
+        if let label = map[keyCode] { return label }
+        // 일반 문자키
+        if let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true),
+           let nsEvent = NSEvent(cgEvent: event) {
+            let chars = nsEvent.charactersIgnoringModifiers?.uppercased() ?? ""
+            if !chars.isEmpty { return chars }
+        }
+        return "(\(keyCode))"
+    }
+}
 
 // MARK: - PendingMapping
 

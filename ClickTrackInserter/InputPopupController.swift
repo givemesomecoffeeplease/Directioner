@@ -10,16 +10,31 @@ class PopupWindow: NSWindow {
     override var canBecomeMain: Bool { true }
 }
 
+class PopupTableView: NSTableView {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func mouseMoved(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        let row = self.row(at: point)
+        if row >= 0 { selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
+    }
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach { removeTrackingArea($0) }
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeAlways, .inVisibleRect], owner: self))
+    }
+}
+
 class InputPopupController: NSWindowController {
 
     private let textField = NSTextField()
-    private let tableView = NSTableView()
+    private let tableView = PopupTableView()
     private let scrollView = NSScrollView()
     private var filteredMappings: [Mapping] = []
     private var selectedIndex: Int = -1
     private var isListVisible = false
 
     var onSubmit: ((String) -> Void)?
+    private var clickMonitor: Any?
 
     private let rowHeight: CGFloat = 28
     private let maxVisibleRows: Int = 6
@@ -77,7 +92,7 @@ class InputPopupController: NSWindowController {
         tableView.selectionHighlightStyle = .regular
         tableView.intercellSpacing = NSSize(width: 0, height: 0)
         tableView.target = self
-        tableView.action = #selector(tableRowClicked)
+        tableView.action = #selector(tableRowClicked(_:))
 
         scrollView.documentView = tableView
         scrollView.hasVerticalScroller = false
@@ -155,6 +170,31 @@ class InputPopupController: NSWindowController {
 
         window.setFrame(frame, display: true, animate: false)
         window.contentView?.layer?.masksToBounds = true
+        installClickMonitor()
+    }
+
+    // MARK: - Click monitor for list
+
+    private func installClickMonitor() {
+        clickMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+            guard let self, !self.scrollView.isHidden else { return event }
+            // scrollView 영역 안인지 확인
+            let winPt = event.locationInWindow
+            let sv = self.scrollView.frame
+            guard winPt.x >= sv.minX && winPt.x <= sv.maxX &&
+                  winPt.y >= sv.minY && winPt.y <= sv.maxY else { return event }
+            // tableView 좌표계로 변환 후 row 계산
+            let tablePoint = self.tableView.convert(winPt, from: nil)
+            let row = self.tableView.row(at: tablePoint)
+            guard row >= 0 && row < self.filteredMappings.count else { return nil }
+            self.selectedIndex = row
+            DispatchQueue.main.async { self.submitSelected() }
+            return nil
+        }
+    }
+
+    private func removeClickMonitor() {
+        if let m = clickMonitor { NSEvent.removeMonitor(m); clickMonitor = nil }
     }
 
     private func hideList() {
@@ -172,6 +212,7 @@ class InputPopupController: NSWindowController {
         }
         window.setFrame(frame, display: true, animate: false)
         window.contentView?.layer?.backgroundColor = .clear
+        removeClickMonitor()
     }
 
     private func selectRow(_ index: Int) {
@@ -181,12 +222,48 @@ class InputPopupController: NSWindowController {
         tableView.scrollRowToVisible(index)
     }
 
+    // MARK: - Table click
+
+    @objc private func tableRowClicked(_ sender: NSTableView) {
+        let row = sender.clickedRow
+        guard row >= 0 else { return }
+        selectedIndex = row
+        submitSelected()
+    }
+
     // MARK: - Submit
 
     @objc private func submitFromField() {
         let text = textField.stringValue.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !text.isEmpty else { hide(); return }
+
+        let all = MappingStore.shared.mappings
+        let match = all.first { $0.abbreviation.lowercased() == text }
+            ?? all.first { $0.displayName.lowercased() == text }
+
+        guard let found = match else {
+            shakeTextField()
+            window?.makeFirstResponder(textField)
+            return
+        }
+        let path = found.filePath
         hide()
-        if !text.isEmpty { onSubmit?(text) }
+        onSubmit?(path)
+    }
+
+    private func shakeTextField() {
+        guard let container = window?.contentView?.subviews.first else { return }
+        container.wantsLayer = true
+        let x = container.frame.origin.x
+        let shake = CAKeyframeAnimation(keyPath: "position.x")
+        shake.values = [x, x - 8, x + 8, x - 5, x + 5, x]
+        shake.duration = 0.35
+        shake.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        container.layer?.add(shake, forKey: "shake")
+        textField.textColor = NSColor.systemRed
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+            self?.textField.textColor = NSColor.labelColor
+        }
     }
 
     private func submitSelected() {
@@ -194,17 +271,11 @@ class InputPopupController: NSWindowController {
             submitFromField()
             return
         }
-        let abbr = filteredMappings[selectedIndex].abbreviation
+        let path = filteredMappings[selectedIndex].filePath
         hide()
-        onSubmit?(abbr)
+        onSubmit?(path)
     }
 
-    @objc private func tableRowClicked() {
-        let row = tableView.clickedRow
-        guard row >= 0 else { return }
-        selectedIndex = row
-        submitSelected()
-    }
 }
 
 // MARK: - NSTextFieldDelegate
@@ -251,7 +322,7 @@ extension InputPopupController: NSTextFieldDelegate {
 
         if raw.contains(" ") {
             field.stringValue = raw.replacingOccurrences(of: " ", with: "")
-            submitFromField()
+            if isListVisible { submitSelected() } else { submitFromField() }
             return
         }
 

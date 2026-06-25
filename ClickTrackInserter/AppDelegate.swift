@@ -10,54 +10,49 @@ import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
 
+    static weak var shared: AppDelegate?
+
     private var statusItem: NSStatusItem?
     private var settingsWindow: NSWindow?
-    private let hotkeyMonitor = HotkeyMonitor()
+    let hotkeyMonitor = HotkeyMonitor()
     private lazy var inputPopup = InputPopupController()
     private let logicPro = LogicProController()
     private let dropIndicator = DropIndicator()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
         NSApp.setActivationPolicy(.accessory)
         setupMenuBarItem()
         setupHotkey()
     }
 
     private func setupHotkey() {
-        hotkeyMonitor.onDoubleShift = { [weak self] in
-            print("[AppDelegate] onDoubleShift 발동")
+        hotkeyMonitor.onTrigger = { [weak self] in
             self?.inputPopup.show()
         }
-        inputPopup.onSubmit = { [weak self] abbreviation in
+        inputPopup.onSubmit = { [weak self] path in
             guard let self else { return }
-            guard let path = MappingStore.shared.filePath(for: abbreviation) else {
-                print("[AppDelegate] 매핑 없음: \(abbreviation)")
-                return
-            }
             let url = URL(fileURLWithPath: path)
             let fileName = url.deletingPathExtension().lastPathComponent
-            print("[AppDelegate] 드롭 대기: \(abbreviation) → \(path)")
+            print("[AppDelegate] 드롭 대기: \(path)")
 
-            // 커서 옆 배지 표시 + 클릭 위치에 파일 드롭
             self.dropIndicator.show(fileName: fileName)
-            // 배지 상태에서 Logic Pro 줌/스크롤 단축키가 작동하도록 포커스 반환
             if let logicApp = NSRunningApplication.runningApplications(withBundleIdentifier: LogicProController.bundleID).first {
                 logicApp.activate(options: .activateIgnoringOtherApps)
             }
+
+            // 클릭: Logic Pro 위면 그 위치에 즉시 드롭
             self.dropIndicator.onClickInLogicPro = { [weak self] clickCG in
                 guard let self else { return false }
-                // Logic Pro 위를 클릭한 경우에만 처리
                 guard self.logicPro.isOverLogicPro(point: clickCG) else { return false }
                 self.dropIndicator.hide()
                 self.logicPro.insertAudio(url: url, at: clickCG) { result in
                     switch result {
-                    case .success:
-                        print("[AppDelegate] 삽입 완료")
-                    case .failure(let err):
-                        print("[AppDelegate] 삽입 실패: \(err.localizedDescription)")
+                    case .success: print("[AppDelegate] 삽입 완료")
+                    case .failure(let err): print("[AppDelegate] 삽입 실패: \(err.localizedDescription)")
                     }
                 }
-                return true  // 클릭 이벤트 소비
+                return true
             }
         }
         hotkeyMonitor.start()

@@ -14,15 +14,15 @@ class LogicProController {
     // MARK: - Public
 
     /// 사용자가 클릭한 CG 좌표에 파일 드롭
-    func insertAudio(url: URL, at clickCG: CGPoint, completion: @escaping (Result<Void, Error>) -> Void) {
+    func insertAudio(url: URL, at dropCG: CGPoint, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let logicApp = runningLogicPro() else {
             completion(.failure(LPError.notRunning))
             return
         }
-        print("[LogicPro] 드롭 좌표 (클릭): CG\(clickCG)")
+        print("[LogicPro] 드롭 좌표: CG\(dropCG)")
         logicApp.activate(options: .activateIgnoringOtherApps)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.dragWindow.startDrag(url: url, to: clickCG)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
+            self.dragWindow.startDrag(url: url, to: dropCG)
             completion(.success(()))
         }
     }
