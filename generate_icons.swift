@@ -1,12 +1,21 @@
 #!/usr/bin/env swift
 import Cocoa
 
-func drawIcon(size: CGFloat) -> NSImage {
-    let image = NSImage(size: NSSize(width: size, height: size))
-    image.lockFocus()
+func drawIcon(size: Int) -> NSBitmapImageRep {
+    let rep = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: size, pixelsHigh: size,
+        bitsPerSample: 8, samplesPerPixel: 4,
+        hasAlpha: true, isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0, bitsPerPixel: 0
+    )!
+    rep.size = NSSize(width: size, height: size)
 
-    let ctx = NSGraphicsContext.current!.cgContext
-    let s = size
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+
+    let s = CGFloat(size)
 
     // 배경: 연한 파란색 둥근 사각형
     let bgColor = NSColor(red: 0.82, green: 0.93, blue: 0.95, alpha: 1.0)
@@ -15,33 +24,17 @@ func drawIcon(size: CGFloat) -> NSImage {
     let bgPath = NSBezierPath(roundedRect: NSRect(x: 0, y: 0, width: s, height: s), xRadius: radius, yRadius: radius)
     bgPath.fill()
 
-    // 좌표계: NSImage는 좌하단 원점, Y 위 증가
-    // 디자인 기준(좌상단): 전체 그룹 bounding box x:288~393, y:85~195 (680x280 뷰박스 기준)
-    // 배경 중앙: 340, 140 (뷰박스 기준)
-    // 아이콘 영역: 배경 rect x:240~440, y:40~240 → 200x200
-    // 그룹을 200x200 안에 정규화
-
-    let vbW: CGFloat = 200  // 배경 크기 (뷰박스 내)
+    let vbW: CGFloat = 200
     let vbH: CGFloat = 200
-
-    // 그룹 bounding box (뷰박스 절대좌표)
-    let gxMin: CGFloat = 288 - 240  // 배경 x=240 기준 상대
-    let gxMax: CGFloat = 393 - 240
-    let gyMin: CGFloat = 85 - 40    // 배경 y=40 기준 상대
-    let gyMax: CGFloat = 195 - 40
-
-    // 스케일: 아이콘 크기에 맞게 (여백 12% 포함)
     let margin = s * 0.10
     let drawW = s - margin * 2
     let drawH = s - margin * 2
 
     func tx(_ x: CGFloat) -> CGFloat {
-        // 뷰박스 x → 아이콘 x (좌→우 동일)
         return margin + (x - 240) / vbW * drawW
     }
     func ty(_ y: CGFloat) -> CGFloat {
-        // 뷰박스 y (아래로 증가) → NSImage y (위로 증가)
-        let relY = (y - 40) / vbH  // 0~1, 0=top
+        let relY = (y - 40) / vbH
         return s - margin - relY * drawH
     }
 
@@ -76,14 +69,12 @@ func drawIcon(size: CGFloat) -> NSImage {
     cursor.close()
     cursor.fill()
 
-    image.unlockFocus()
-    return image
+    NSGraphicsContext.restoreGraphicsState()
+    return rep
 }
 
-func savePNG(_ image: NSImage, to path: String) {
-    guard let tiff = image.tiffRepresentation,
-          let bitmap = NSBitmapImageRep(data: tiff),
-          let png = bitmap.representation(using: .png, properties: [:]) else {
+func savePNG(_ rep: NSBitmapImageRep, to path: String) {
+    guard let png = rep.representation(using: .png, properties: [:]) else {
         print("❌ PNG 변환 실패: \(path)")
         return
     }
@@ -113,8 +104,8 @@ let sizes: [(Int, String)] = [
 ]
 
 for (size, name) in sizes {
-    let img = drawIcon(size: CGFloat(size))
-    savePNG(img, to: base + "/" + name)
+    let rep = drawIcon(size: size)
+    savePNG(rep, to: base + "/" + name)
 }
 
 print("완료! \(base)")
