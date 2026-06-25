@@ -9,9 +9,9 @@ import SwiftUI
 
 @main
 struct ClickTrackInserterApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+        Settings { EmptyView() }
     }
 }

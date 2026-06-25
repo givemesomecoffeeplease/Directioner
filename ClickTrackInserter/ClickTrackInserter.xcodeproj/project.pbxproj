@@ -8,8 +8,6 @@
 
 /* Begin PBXFileReference section */
 		F81654872FEC498800D9D585 /* ClickTrackInserter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClickTrackInserter.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F84E38062FEC4C5500801ECB /* ClickTrackInserter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ClickTrackInserter.xcodeproj; sourceTree = "<group>"; };
-		F84E38292FEC4DC400801ECB /* ClickTrackInserter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ClickTrackInserter.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,20 +41,6 @@
 			isa = PBXGroup;
 			children = (
 				F81654872FEC498800D9D585 /* ClickTrackInserter.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		F84E38092FEC4C5500801ECB /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		F84E382E2FEC4DC400801ECB /* Products */ = {
-			isa = PBXGroup;
-			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,16 +97,6 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F81654882FEC498800D9D585 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = F84E382E2FEC4DC400801ECB /* Products */;
-					ProjectRef = F84E38292FEC4DC400801ECB /* ClickTrackInserter.xcodeproj */;
-				},
-				{
-					ProductGroup = F84E38092FEC4C5500801ECB /* Products */;
-					ProjectRef = F84E38062FEC4C5500801ECB /* ClickTrackInserter.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				F81654862FEC498800D9D585 /* ClickTrackInserter */,
@@ -277,20 +251,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = NO;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAccessibilityUsageDescription = "Shift 더블탭 단축키 감지를 위해 접근성 권한이 필요합니다.";
-				INFOPLIST_KEY_CFBundleDisplayName = Directioner;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = HanHee.Directioner;
+				PRODUCT_BUNDLE_IDENTIFIER = HanHee.ClickTrackInserter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -310,20 +281,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = NO;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAccessibilityUsageDescription = "Shift 더블탭 단축키 감지를 위해 접근성 권한이 필요합니다.";
-				INFOPLIST_KEY_CFBundleDisplayName = Directioner;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = HanHee.Directioner;
+				PRODUCT_BUNDLE_IDENTIFIER = HanHee.ClickTrackInserter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

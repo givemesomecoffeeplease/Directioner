@@ -1,0 +1,102 @@
+//
+//  AppDelegate.swift
+//  ClickTrackInserter
+//
+//  Created by 한희 on 6/25/26.
+//
+
+import Cocoa
+import SwiftUI
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+    private var statusItem: NSStatusItem?
+    private var settingsWindow: NSWindow?
+    private let hotkeyMonitor = HotkeyMonitor()
+    private lazy var inputPopup = InputPopupController()
+    private let logicPro = LogicProController()
+    private let dropIndicator = DropIndicator()
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
+        setupMenuBarItem()
+        setupHotkey()
+    }
+
+    private func setupHotkey() {
+        hotkeyMonitor.onDoubleShift = { [weak self] in
+            print("[AppDelegate] onDoubleShift 발동")
+            self?.inputPopup.show()
+        }
+        inputPopup.onSubmit = { [weak self] abbreviation in
+            guard let self else { return }
+            guard let path = MappingStore.shared.filePath(for: abbreviation) else {
+                print("[AppDelegate] 매핑 없음: \(abbreviation)")
+                return
+            }
+            let url = URL(fileURLWithPath: path)
+            let fileName = url.deletingPathExtension().lastPathComponent
+            print("[AppDelegate] 드롭 대기: \(abbreviation) → \(path)")
+
+            // 커서 옆 배지 표시 + 클릭 위치에 파일 드롭
+            self.dropIndicator.show(fileName: fileName)
+            // 배지 상태에서 Logic Pro 줌/스크롤 단축키가 작동하도록 포커스 반환
+            if let logicApp = NSRunningApplication.runningApplications(withBundleIdentifier: LogicProController.bundleID).first {
+                logicApp.activate(options: .activateIgnoringOtherApps)
+            }
+            self.dropIndicator.onClickInLogicPro = { [weak self] clickCG in
+                guard let self else { return false }
+                // Logic Pro 위를 클릭한 경우에만 처리
+                guard self.logicPro.isOverLogicPro(point: clickCG) else { return false }
+                self.dropIndicator.hide()
+                self.logicPro.insertAudio(url: url, at: clickCG) { result in
+                    switch result {
+                    case .success:
+                        print("[AppDelegate] 삽입 완료")
+                    case .failure(let err):
+                        print("[AppDelegate] 삽입 실패: \(err.localizedDescription)")
+                    }
+                }
+                return true  // 클릭 이벤트 소비
+            }
+        }
+        hotkeyMonitor.start()
+    }
+
+    private func setupMenuBarItem() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+
+        if let button = statusItem?.button {
+            button.image = NSImage(systemSymbolName: "cursorarrow.rays", accessibilityDescription: "Directioner")
+        }
+
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "설정...", action: #selector(openSettings), keyEquivalent: ","))
+        menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: "종료", action: #selector(quit), keyEquivalent: "q"))
+
+        statusItem?.menu = menu
+    }
+
+    @objc private func openSettings() {
+        if settingsWindow == nil {
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 480, height: 320),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "ClickTrack Inserter 설정"
+            window.contentView = NSHostingView(rootView: SettingsView())
+            window.center()
+            window.isReleasedWhenClosed = false
+            settingsWindow = window
+        }
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @objc private func quit() {
+        NSApplication.shared.terminate(nil)
+    }
+}
