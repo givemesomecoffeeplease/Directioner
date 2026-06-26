@@ -129,6 +129,27 @@ class InputPopupController: NSWindowController {
         close()
     }
 
+    func showError() {
+        guard let window else { return }
+        window.orderFrontRegardless()
+        window.makeKey()
+
+        // 텍스트 빨간색
+        textField.textColor = .systemRed
+
+        // 흔들기 애니메이션
+        let shake = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        shake.timingFunction = CAMediaTimingFunction(name: .linear)
+        shake.duration = 0.4
+        shake.values = [0, -8, 8, -6, 6, -4, 4, 0]
+        window.contentView?.layer?.add(shake, forKey: "shake")
+
+        // 0.6초 후 원래 색으로 복원
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            self?.textField.textColor = .labelColor
+        }
+    }
+
     // MARK: - List
 
     private func showList(filter: String) {
@@ -254,13 +275,17 @@ class InputPopupController: NSWindowController {
     private func shakeTextField() {
         guard let container = window?.contentView?.subviews.first else { return }
         container.wantsLayer = true
-        let x = container.frame.origin.x
+        window?.contentView?.displayIfNeeded()  // 레이어 즉시 확보
+
+        textField.textColor = NSColor.systemRed
+
         let shake = CAKeyframeAnimation(keyPath: "position.x")
-        shake.values = [x, x - 8, x + 8, x - 5, x + 5, x]
-        shake.duration = 0.35
+        let x = container.layer?.position.x ?? container.frame.midX
+        shake.values = [x, x - 8, x + 8, x - 6, x + 6, x - 3, x + 3, x]
+        shake.duration = 0.4
         shake.timingFunction = CAMediaTimingFunction(name: .easeOut)
         container.layer?.add(shake, forKey: "shake")
-        textField.textColor = NSColor.systemRed
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
             self?.textField.textColor = NSColor.labelColor
         }
