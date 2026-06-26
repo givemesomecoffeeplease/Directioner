@@ -33,6 +33,9 @@ echo "📦 설치 중..."
 rm -rf "$INSTALL_PATH"
 cp -R "$BUILD_APP" "$INSTALL_PATH"
 
+# CFBundleName 패치 (손쉬운 사용 목록에 표시되는 이름)
+/usr/libexec/PlistBuddy -c "Set :CFBundleName Directioner" "$INSTALL_PATH/Contents/Info.plist" 2>/dev/null || true
+
 echo "🚀 실행 중..."
 open "$INSTALL_PATH"
 

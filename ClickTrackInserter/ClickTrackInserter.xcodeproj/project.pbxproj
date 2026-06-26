@@ -169,7 +169,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rm -rf \"/Applications/Directioner.app\"\ncp -R \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}\" \"/Applications/Directioner.app\"\necho \"Copied to /Applications/Directioner.app\"\n";
+			shellScript = "rm -rf \"/Applications/Directioner.app\"\ncp -R \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}\" \"/Applications/Directioner.app\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleName Directioner\" \"/Applications/Directioner.app/Contents/Info.plist\"\necho \"Copied to /Applications/Directioner.app\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -316,6 +316,7 @@
 				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Directioner;
+				INFOPLIST_KEY_CFBundleName = Directioner;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -341,6 +342,7 @@
 				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Directioner;
+				INFOPLIST_KEY_CFBundleName = Directioner;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
