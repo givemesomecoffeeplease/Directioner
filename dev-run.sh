@@ -4,12 +4,15 @@ set -e
 PROJECT="$HOME/Desktop/app/ClickTrackInserter/ClickTrackInserter.xcodeproj"
 DERIVED="$HOME/Library/Developer/Xcode/DerivedData"
 APP_NAME="ClickTrackInserter"
-INSTALL_PATH="/Applications/ClickTrackInserter.app"
+INSTALL_PATH="/Applications/Directioner.app"
 
-echo "🔨 빌드 중..."
+echo "🔨 빌드 중 (Universal Binary: arm64 + x86_64)..."
 xcodebuild -project "$PROJECT" \
   -scheme "$APP_NAME" \
-  -configuration Debug build \
+  -configuration Release \
+  ARCHS="arm64 x86_64" \
+  ONLY_ACTIVE_ARCH=NO \
+  build \
   2>&1 | grep -E "error:|warning:|BUILD"
 
 # 최신 빌드 경로 자동 탐색
@@ -24,6 +27,7 @@ fi
 
 echo "🛑 기존 앱 종료..."
 pkill -x "$APP_NAME" 2>/dev/null || true
+pkill -x "Directioner" 2>/dev/null || true
 sleep 0.5
 
 echo "🔐 손쉬운 사용 권한 초기화..."

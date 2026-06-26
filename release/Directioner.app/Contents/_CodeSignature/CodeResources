@@ -10,29 +10,11 @@
 		</data>
 		<key>Resources/Assets.car</key>
 		<data>
-		3nqH8uE6DnGIArEkZueZDIIeNnE=
+		Z8SUbARD0n5iRxGOPmy7BChq21s=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>MacOS/ClickTrackInserter.debug.dylib</key>
-		<dict>
-			<key>cdhash</key>
-			<data>
-			1U2xBbAJ6LrVPLI70YSYQhHAgwQ=
-			</data>
-			<key>requirement</key>
-			<string>cdhash H"d54db105b009e8bad53cb23bd184984211c08304"</string>
-		</dict>
-		<key>MacOS/__preview.dylib</key>
-		<dict>
-			<key>cdhash</key>
-			<data>
-			3wMrymdxHtrvQT0C0vTQ8Vuqcqs=
-			</data>
-			<key>requirement</key>
-			<string>cdhash H"df032bca67711edaef413d02d2f4d0f15baa72ab"</string>
-		</dict>
 		<key>Resources/AppIcon.icns</key>
 		<dict>
 			<key>hash2</key>
@@ -44,7 +26,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			VMG8hRKWvZoqXDYU/zIS79Rf9/Psl1lmETW8R5UXtO8=
+			3LqIbM5QHs6bH0n/MYEdEpeFVjQ//z3QRsjOwaUxB/E=
 			</data>
 		</dict>
 	</dict>
